@@ -37,7 +37,11 @@ export const createAppRouter = (): Router => {
     routes,
   });
 
+  console.log("DEBUG: ", routes);
+
   router.beforeEach(async (to, from) => {
+    console.log("DEBUG-1: ", to.meta.requiresAuth);
+    console.log("DEBUG-2: ", to.meta.name);
     if (to.meta.requiresAuth === undefined) {
       to.meta.requiresAuth = true;
     }

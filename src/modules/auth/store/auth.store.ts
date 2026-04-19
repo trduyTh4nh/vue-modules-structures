@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { LoginRequestDto, User } from "@/modules/auth/types";
+import type { LoginRequestDto, User } from "../types";
 import { computed, ref } from "vue";
 import { authStorage } from "../storage/auth.storage";
 import { authApi } from "../api/auth.api";
@@ -33,7 +33,6 @@ export const useAuthStore = defineStore("auth", () => {
       setSession(accessToken, loggedInUser);
       return true;
     } catch (error) {
-      console.log("error: ", error);
       return false;
     } finally {
       loading.value = false;

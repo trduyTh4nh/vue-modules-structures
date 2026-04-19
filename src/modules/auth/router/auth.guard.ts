@@ -14,7 +14,7 @@ export type AuthGuard = (
 export const authRequireAuthGuard: AuthGuard = (_to, _from) => {
   const authStore = useAuthStore();
 
-  console.log("token trong guard:", authStore.token); // ← có null không?
+  console.log("token trong guard:", authStore.token);
   console.log("isAuthenticated:", authStore.isAuthenticated);
 
   if (_to.meta.requiresAuth && !authStore.isAuthenticated) {

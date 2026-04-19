@@ -27,7 +27,7 @@ export const specificGuard: Record<string, RouterGuard> = {
 export const executeGuards = async (
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
-): Promise<boolean | RouteLocationRaw | string | void> => {
+): Promise<boolean | RouteLocationRaw | string> => {
   // Execute global guard
 
   console.log("guards specific check: ", to.meta.guards);
@@ -52,4 +52,6 @@ export const executeGuards = async (
       }
     }
   }
+
+  return true;
 };
