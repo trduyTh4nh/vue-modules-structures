@@ -13,7 +13,7 @@ export type HttpClient = AxiosInstance;
 
 // default config
 const defaultConfig: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: 'http://localhost:5000',
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -37,17 +37,17 @@ export const uploadApiInstance: AxiosInstance = axios.create({
   },
 });
 
-// Attach request interceptors
-apiInstance.interceptors.request.use(
-  requestInterceptor,
-  requestErrorInterceptor,
-);
+// // Attach request interceptors
+// apiInstance.interceptors.request.use(
+//   requestInterceptor,
+//   requestErrorInterceptor,
+// );
 
-// Attach response interceptors
-apiInstance.interceptors.response.use(
-  responseInterceptor,
-  responseErrorInterceptor,
-);
+// // Attach response interceptors
+// apiInstance.interceptors.response.use(
+//   responseInterceptor,
+//   responseErrorInterceptor,
+// );
 
 // Upload instance with interceptors
 uploadApiInstance.interceptors.request.use(
