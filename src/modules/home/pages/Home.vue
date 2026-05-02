@@ -3,179 +3,82 @@
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { homeService } from "../services/home.service";
+import { useTodoStore, type Todo } from "../store/todo.store";
+import TodoList from "../components/TodoList.vue";
+import { storeToRefs } from "pinia";
+import TodoForm from "../components/TodoForm.vue";
 
-const authStore = useAuthStore();
-const post = ref<any | null>(null);
-const todo = ref<any | null>(null);
-const loading = ref(false);
-const error = ref<string | null>(null);
+const todoStore = useTodoStore();
+const {  filterStatus, getTodos } = storeToRefs(todoStore); // reactive refs
+const { toggleTodo, deleteTodo, updateTodo, createTodo } = todoStore;
 
-const fetchData = async () => {
-  loading.value = true;
-  error.value = null;
 
-  try {
-    const [postData, todoData] = await Promise.all([
-      homeService.getPost(10),
-      homeService.getTodo(10),
-    ]);
+const editingTodo = ref<Todo | null>(null);
 
-    post.value = postData;
-    todo.value = todoData;
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "Failed to fetch data";
-  } finally {
-    loading.value = false;
-  }
+const searchStatus = (e: any) => {
+  filterStatus.value = e.target.value;
 };
 
-onMounted(() => {
-  fetchData();
-});
+const handleCancel = () => {
+  editingTodo.value = null;
+};
+const handleEdit = (id: string) => {
+  editingTodo.value = getTodos.value.find((t) => t.id === id) ?? null;
+};
+
+
+const handleSubmit = (
+  payload: Omit<Todo, "id" | "createdAt" | "updatedAt">,
+) => {
+  if (editingTodo.value) {
+    updateTodo(editingTodo.value.id, payload);
+    editingTodo.value = null;
+  } else {
+    createTodo(payload);
+  }
+};
 </script>
 
 <template>
   <div class="home-page">
-    <header class="home-header">
-      <h1>Welcome, {{ authStore.user?.username || "Guest" }} 👋</h1>
-      <button class="btn-logout" @click="authStore.logout()">Logout</button>
-    </header>
+    <div class="home-page-control">
+      <div class="search-todo">
+        <select @change="searchStatus" class="filter-status">
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
 
-    <div class="content">
-      <section class="api-test-section">
-        <h2>API Test Results</h2>
-
-        <div v-if="loading" class="loading">Loading data...</div>
-
-        <div v-else-if="error" class="error">Error: {{ error }}</div>
-
-        <div v-else class="data-container">
-          <div class="post-card">
-            <h3>📝 Post from JSONPlaceholder</h3>
-            <p><strong>Title:</strong> {{ post?.title }}</p>
-            <p><strong>Body:</strong> {{ post?.body }}</p>
-            <small>Post ID: {{ post?.id }} | User ID: {{ post?.userId }}</small>
-          </div>
-
-          <div class="todo-card">
-            <h3>✅ Todo from JSONPlaceholder</h3>
-            <p><strong>Title:</strong> {{ todo?.title }}</p>
-            <p>
-              <strong>Status:</strong>
-              <span :class="{ completed: todo?.completed }">
-                {{ todo?.completed ? "Completed ✓" : "Pending ⏳" }}
-              </span>
-            </p>
-            <small>Todo ID: {{ todo?.id }} | User ID: {{ todo?.userId }}</small>
-          </div>
-        </div>
-      </section>
-
-      <section class="user-info">
-        <h3>User Information</h3>
-        <p><strong>Username:</strong> {{ authStore.user?.username }}</p>
-        <p><strong>Email:</strong> {{ authStore.user?.email }}</p>
-        <p>
-          <strong>Authenticated:</strong>
-          {{ authStore.isAuthenticated ? "Yes ✓" : "No ✗" }}
-        </p>
-      </section>
+      <div class="create-todo">
+        <TodoForm
+          :editing-todo="editingTodo"
+          @submit="handleSubmit"
+          @cancel="handleCancel"
+        />
+      </div>
     </div>
+
+    <TodoList
+      v-for="todo in getTodos"
+      :key="todo.id"
+      :id="todo.id"
+      :title="todo.title"
+      :description="todo.description"
+      :completed="todo.completed"
+      :priority="todo.priority"
+      :due-date="todo.dueDate"
+      :created-at="todo.createdAt"
+      :updated-at="todo.updatedAt"
+      @toggle="toggleTodo"
+      @delete="deleteTodo"
+      @edit="handleEdit"
+    />
   </div>
 </template>
 
-<style scoped>
-.home-page {
-  padding: 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.home-header {
+<style lang="css" scoped>
+.home-page-control {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 2rem;
-}
-
-.btn-logout {
-  padding: 0.5rem 1rem;
-  background-color: #dc2626;
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-}
-
-.btn-logout:hover {
-  background-color: #b91c1c;
-}
-
-.content {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 2fr 1fr;
-}
-
-.api-test-section {
-  background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
-
-.data-container {
-  display: grid;
-  gap: 1rem;
-}
-
-.post-card,
-.todo-card {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
-
-.post-card h3,
-.todo-card h3 {
-  margin-top: 0;
-  color: #333;
-}
-
-.completed {
-  color: #4caf50;
-  font-weight: bold;
-}
-
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-}
-
-.error {
-  color: red;
-  padding: 1rem;
-  background: #fee;
-  border-radius: 4px;
-}
-
-.user-info {
-  background: #f0f9ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  height: fit-content;
-}
-
-.user-info h3 {
-  margin-top: 0;
-}
-
-@media (max-width: 768px) {
-  .content {
-    grid-template-columns: 1fr;
-  }
 }
 </style>
