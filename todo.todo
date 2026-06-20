@@ -1,1 +1,26 @@
-☐ Create default layout 
+
+✔ Create default layout @done(26-04-19 21:17)
+✔ setup axios module @done(26-04-19 21:17)
+✔ setup router module @done(26-04-19 21:17)
+
+☐ setup base component
+    ☐ button, text, input
+    ☐ table, pagination
+    ☐ modal, dialog
+    ☐ form, field
+    ☐ layout
+    
+☐ setup style scss for page 
+    ☐ setup global style
+    ☐ setup component style
+    ☐ setup page style
+    ☐ color style
+    ☐ font style
+    ☐ layout style
+
+☐ setup language module
+    ☐ setup language localstorage
+    ☐ setup language api
+    ☐ setup language page
+
+☐ setup graph, chart module
